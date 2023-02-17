@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, flash, session
+from flask import Flask, request, render_template, redirect, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import satisfaction_survey
 
@@ -6,6 +6,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = "wow-a-secret"
 debug = DebugToolbarExtension(app)
 
+response = []
 questions = [0]
 
 @app.route("/")
@@ -13,7 +14,6 @@ def survey_start():
     """home page with survey instructions"""
     title = satisfaction_survey.title
     instructions = satisfaction_survey.instructions
-    session['responses'] = []
     
     return render_template("home.html", title = title, instructions = instructions)
 
@@ -55,12 +55,7 @@ def record_answer():
     append_list.append(request.form['choices'])
     append_list.append(request.form['question'])
     append_list.append(request.form[question_text])  
-    
-    # response.append(append_list)
-    response = session['responses']
     response.append(append_list)
-    session['responses'] = response
-    
     questions.append(next_question)  
         
     if next_question == len(satisfaction_survey.questions):
@@ -72,5 +67,4 @@ def record_answer():
 @app.route("/thankyou")
 def thank_you():
     """thank you page"""
-    response = session['responses']
     return render_template("thankyou.html", responses = response)
